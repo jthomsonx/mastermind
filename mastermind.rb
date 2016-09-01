@@ -28,6 +28,7 @@ class Game
 #		print_code	# For debugging purposes only
 		start_playing
 		show_result
+    new_game
 	end
 
 	def welcome_message
@@ -186,6 +187,18 @@ class Game
 		end
 		puts "#{col} colours correct, with #{pos} in the correct position."
 	end
+
+  def new_game
+    print "New game?  Y/N: "
+    answer = gets.chomp.downcase
+    if answer == "y"  
+      game = Game.new
+      game.play
+    else
+      puts ""
+      puts "OK.  Thank you for playing Mastermind!"
+    end
+  end
 
 	class Code
 		attr_reader :random, :values
