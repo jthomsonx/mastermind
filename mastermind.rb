@@ -13,6 +13,7 @@ class Game
 		@counter = 1
 		@code = Code.new()
 		@answer = Array.new()
+    @temp = Array.new()
 	end
 
 	def play
@@ -108,7 +109,6 @@ class Game
 		else
 			puts "Try again!"
 		end
-		@answer = []
 	end
 
 	def human_guess
@@ -116,13 +116,43 @@ class Game
 	end
 
 	def computer_guess
-		until @answer.length == 4
-			@answer << @code.values.sample
-		end
+    if @counter == 1
+		  until @answer.length == 4
+			 @answer << @code.values.sample
+		  end
+    else
+      computer_ai
+    end
 		puts @answer.to_s
 		sleep 2		
 	end
 
+  def computer_ai
+    if @temp.length == 4 && @pos >= 1
+      # All colours correct. Computer AI to start guessing correct positions   
+      @answer.each_index { |i| @answer[i] = nil unless @answer[i] == @code.random[i] }
+      puts "Answer array is: " + @answer.to_s
+      @answer.each { |x| @temp.delete_at(@temp.index(x)) if @temp.include?(x) }
+      puts "Temp array is: " + @temp.to_s
+      @temp.shuffle!
+      @answer.each_index do |i|
+        if @answer[i] == nil
+          @answer[i] = @temp[0]
+          @temp.delete_at(0)
+        end
+      end
+      puts "New Temp array is: " + @temp.to_s
+      puts "New Answer array is " + @answer.to_s
+    else
+      # Continue to guess until all colours correct
+      array = []
+      (4 - @temp.length).times do
+        array << @code.values.sample
+      end
+      @answer = (array + @temp).shuffle
+    end
+  end
+   
 	def game_over
 		@counter > 12 || @winner
 	end
@@ -153,39 +183,25 @@ class Game
 		end
 	end
 
-#	def check_for_pos
-#		pos = 0
-#		@answer.each_with_index do |val, idx|
-#			pos += 1 if @answer[idx] == @code.random[idx]
-#		end
-#		puts "#{pos} in the correct position"
-#	end
-
-#	def check_for_col
-#		col = 0
-#		@code.random.each do |value|
-#			if @answer.include?(value)
-#				col += 1
-#				@answer.delete_at(@answer.index(value))
-#			end
-#		end
-#		puts "#{col} colour(s) correct!"
-#	end
-
 	# Combines both check_for_pos and check_for_col into one method
 	def check_for_match
-		col = 0
-		pos = 0
+		@col = 0
+		@pos = 0
+    @temp = []
+    answer_match = @answer.dup
+    # Checks for correct position of colours
 		@answer.each_with_index do |val, idx|
-			pos += 1 if @answer[idx] == @code.random[idx]
+			@pos += 1 if @answer[idx] == @code.random[idx]
 		end
-		@code.random.each do |val|
-			if @answer.include?(val)
-				col += 1
-				@answer.delete_at(@answer.index(val))
+    # Checks for correct colours in selection.
+		@code.random.each do |x|
+			if answer_match.include?(x)
+				@col += 1
+        @temp << x
+				answer_match.delete_at(answer_match.index(x))
 			end
 		end
-		puts "#{col} colours correct, with #{pos} in the correct position."
+		puts "#{@col} colours correct, with #{@pos} in the correct position."
 	end
 
   def new_game
@@ -210,8 +226,8 @@ class Game
 
 		def computer_code
 			4.times do |x|
-				x = @values.sample # selects random value from @values array
-				@random << x # push random colour value into @random array
+				x = @values.sample  # selects random value from @values array
+				@random << x        # push random colour value into @random array
 			end			
 		end
 
@@ -219,7 +235,6 @@ class Game
 			while true
 				print "Please select a four colour code. Remember, duplicates are allowed: "
 				@random = gets.chomp.downcase.split(" ")
-#				puts @random.inspect 	# For debugging only
 				return false unless human_code_error_check == true
 			end
 		end
