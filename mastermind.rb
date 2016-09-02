@@ -131,9 +131,7 @@ class Game
     if @temp.length == 4 && @pos >= 1
       # All colours correct. Computer AI to start guessing correct positions   
       @answer.each_index { |i| @answer[i] = nil unless @answer[i] == @code.random[i] }
-      puts "Answer array is: " + @answer.to_s
       @answer.each { |x| @temp.delete_at(@temp.index(x)) if @temp.include?(x) }
-      puts "Temp array is: " + @temp.to_s
       @temp.shuffle!
       @answer.each_index do |i|
         if @answer[i] == nil
@@ -141,8 +139,6 @@ class Game
           @temp.delete_at(0)
         end
       end
-      puts "New Temp array is: " + @temp.to_s
-      puts "New Answer array is " + @answer.to_s
     else
       # Continue to guess until all colours correct
       array = []
